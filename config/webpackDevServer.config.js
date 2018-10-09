@@ -8,10 +8,34 @@ const config = require('./webpack.config.dev');
 const paths = require('./paths');
 const fs = require('fs');
 
+
+const devServerSocketFile = '/tmp/dev-server-api';
+
+
+const initApp = () => {
+  const app = require('express')();
+  app.use(function(req, res, next) {
+    const api = require('../src/server/api');
+    Object.keys(require.cache).forEach(function(id) {
+      if (/[\/\\]src\/server[\/\\]/.test(id)) {
+        delete require.cache[id];
+      }
+    });
+    return api.router(req, res, next);
+  });
+  app.listen(65532);
+};
+
+
+const proxyHandler = (...args) => console.log({ args });
+
+
 const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
 const host = process.env.HOST || '0.0.0.0';
 
-module.exports = function(proxy, allowedHost) {
+
+module.exports = function(_proxy, allowedHost) {
+  const proxy = true;
   return {
     // WebpackDevServer 2.4.3 introduced a security fix that prevents remote
     // websites from potentially accessing local content through DNS rebinding:
@@ -29,10 +53,9 @@ module.exports = function(proxy, allowedHost) {
     // So we will disable the host check normally, but enable it if you have
     // specified the `proxy` setting. Finally, we let you override it if you
     // really know what you're doing with a special environment variable.
-    disableHostCheck:
-      !proxy || process.env.DANGEROUSLY_DISABLE_HOST_CHECK === 'true',
+    disableHostCheck: true,
     // Enable gzip compression of generated files.
-    compress: true,
+    compress: false,
     // Silence WebpackDevServer's own logs since they're generally not useful.
     // It will still show compile warnings and errors with this setting.
     clientLogLevel: 'none',
@@ -64,7 +87,7 @@ module.exports = function(proxy, allowedHost) {
     publicPath: config.output.publicPath,
     // WebpackDevServer is noisy by default so we emit custom message instead
     // by listening to the compiler events with `compiler.hooks[...].tap` calls above.
-    quiet: true,
+    quiet: false,
     // Reportedly, this avoids CPU overload on some systems.
     // https://github.com/facebook/create-react-app/issues/293
     // src/node_modules is not ignored to support absolute imports
@@ -82,8 +105,13 @@ module.exports = function(proxy, allowedHost) {
       disableDotRule: true,
     },
     public: allowedHost,
-    proxy,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:65532',
+      }
+    },
     before(app, server) {
+      initApp();
       if (fs.existsSync(paths.proxySetup)) {
         // This registers user provided middleware for proxy reasons
         require(paths.proxySetup)(app);

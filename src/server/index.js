@@ -5,6 +5,9 @@ import path from 'path';
 import fs from 'fs';
 
 
+import api from './api';
+
+
 import App from '../App';
 import { renderToString } from 'react-dom/server';
 
@@ -17,6 +20,9 @@ app.use(
   '/static',
   express.static(staticPath),
 );
+
+
+api.init(app);
 
 
 app.get('/', (req, res) => {

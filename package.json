@@ -108,5 +108,9 @@
     "presets": [
       "react-app"
     ]
+  },
+  "devDependencies": {
+    "chokidar": "^2.0.4",
+    "express-reload": "^1.1.0"
   }
 }
