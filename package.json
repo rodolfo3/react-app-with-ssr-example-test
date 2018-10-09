@@ -24,6 +24,7 @@
     "eslint-plugin-import": "2.14.0",
     "eslint-plugin-jsx-a11y": "6.1.1",
     "eslint-plugin-react": "7.11.1",
+    "express": "^4.16.3",
     "file-loader": "2.0.0",
     "fs-extra": "7.0.0",
     "html-webpack-plugin": "4.0.0-alpha.2",
@@ -48,6 +49,7 @@
     "terser-webpack-plugin": "1.1.0",
     "url-loader": "1.1.1",
     "webpack": "4.19.1",
+    "webpack-cli": "^3.1.2",
     "webpack-dev-server": "3.1.9",
     "webpack-manifest-plugin": "2.0.4",
     "workbox-webpack-plugin": "3.6.2"

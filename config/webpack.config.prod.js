@@ -96,7 +96,7 @@ const getStyleLoaders = (cssOptions, preProcessor) => {
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
 // The development configuration is different and lives in a separate file.
-module.exports = {
+const conf = {
   mode: 'production',
   // Don't attempt to continue if there are any errors.
   bail: true,
@@ -495,3 +495,29 @@ module.exports = {
   // our own hints via the FileSizeReporter
   performance: false,
 };
+
+
+module.exports = [
+  conf,
+  {
+    ...conf,
+    target: 'node',
+    entry: ['./src/server'],
+    optimization: {
+    },
+    plugins: [
+      new MiniCssExtractPlugin({
+        // Options similar to the same options in webpackOptions.output
+        // both options are optional
+        filename: 'static/css/[name].[contenthash:8].css',
+        chunkFilename: 'static/css/[name].[contenthash:8].chunk.css',
+      }),
+    ],
+    output: {
+      path: paths.appBuild,
+      filename: 'server.js',
+      chunkFilename: 'server.[chunkhash:8].chunk.js',
+      publicPath: publicPath,
+    }
+  }
+];
