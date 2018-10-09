@@ -12,14 +12,30 @@ import App from '../App';
 import { renderToString } from 'react-dom/server';
 
 
+const buildPath = path.resolve('./build/');
+const staticPath = path.resolve(`${buildPath}/static/`);
+
+
 const app = express();
-const staticPath = path.resolve('./build/static')
 
 
 app.use(
   '/static',
   express.static(staticPath),
 );
+
+fs.readdirSync(buildPath)
+  .filter(name => name.indexOf('server') === -1)
+  .filter(name => name.indexOf('.') > 0)
+  .forEach(name => {
+    const content = fs.readFileSync(`${buildPath}/${name}`);
+    app.get(`/${name}`, (req, res) => {
+      res.end(content);
+    });
+  });
+
+
+app.use(api.router);
 
 
 api.init(app);
