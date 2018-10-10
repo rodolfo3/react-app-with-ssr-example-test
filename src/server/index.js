@@ -38,10 +38,7 @@ fs.readdirSync(buildPath)
 app.use(api.router);
 
 
-api.init(app);
-
-
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
   const out = renderToString(<App />);
   const html = String(fs.readFileSync('./build/index.html')).replace('div id="root"></div>', `div id="root">${out}</div>`);
 
