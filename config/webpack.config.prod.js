@@ -498,8 +498,8 @@ const conf = {
 
 
 module.exports = [
-  conf,
-  {
+  merge([common, conf]),
+  merce([common, {
     ...conf,
     target: 'node',
     entry: ['./src/server'],
@@ -519,5 +519,5 @@ module.exports = [
       chunkFilename: 'server.[chunkhash:8].chunk.js',
       publicPath: publicPath,
     }
-  }
+  }]),
 ];
