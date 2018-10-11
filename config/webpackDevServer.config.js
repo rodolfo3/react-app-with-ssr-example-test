@@ -12,18 +12,57 @@ const fs = require('fs');
 const devServerSocketFile = '/tmp/dev-server-api';
 
 
+const apiConfig = require('../config/webpack.config.prod')[1];
+
+
 const initApp = () => {
-  const app = require('express')();
-  app.use(function(req, res, next) {
-    const api = require('../src/server/api');
+  const webpack = require('webpack');
+  const compiler = webpack({
+    ...apiConfig,
+    entry: ['./src/server/api'],
+    output: {
+      library: 'router',
+      libraryTarget: 'umd',
+      path: paths.appBuild,
+      filename: 'dev-router.js',
+    }
+  });
+  compiler.watch({
+    ignored: /node_modules/,
+    progress: true,
+  }, (err, stats) => {
+    if (err) {
+      console.error('=====');
+      console.error(err);
+      console.error('=====');
+    };
+    if (stats.hasErrors()) {
+      console.error('=====');
+      console.error(stats.toString({
+        chunks: false,  // Makes the build much quieter
+        colors: true    // Shows colors in the console
+      }));
+      console.error('=====');
+      try {
+        fs.unlinkSync(`${paths.appBuild}/dev-router.js`);
+      } catch(err) {
+      }
+    };
+
     Object.keys(require.cache).forEach(function(id) {
-      if (/[\/\\]src\/server[\/\\]/.test(id)) {
+      if (/\/dev-router.js$/.test(id)) {
+        console.log(`removing ${id} from cache...`);
         delete require.cache[id];
       }
     });
-    return api.router(req, res, next);
   });
-  app.listen(65532);
+
+  const app = require('express')();
+  app.use(function(req, res, next) {
+    const api = require('../build/dev-router');
+    return api.default.router(req, res, next);
+  });
+  app.listen(65001);
 };
 
 
@@ -106,12 +145,11 @@ module.exports = function(_proxy, allowedHost) {
     },
     public: allowedHost,
     proxy: {
-      '/api': {
-        target: 'http://localhost:65532',
-      }
+      '/api': 'http://localhost:65001',
     },
     before(app, server) {
       initApp();
+
       if (fs.existsSync(paths.proxySetup)) {
         // This registers user provided middleware for proxy reasons
         require(paths.proxySetup)(app);

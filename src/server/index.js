@@ -19,34 +19,39 @@ const staticPath = path.resolve(`${buildPath}/static/`);
 const app = express();
 
 
-app.use(
-  '/static',
-  express.static(staticPath),
-);
+// app.use(
+//   '/static',
+//   express.static(staticPath),
+// );
 
-fs.readdirSync(buildPath)
-  .filter(name => name.indexOf('server') === -1)
-  .filter(name => name.indexOf('.') > 0)
-  .forEach(name => {
-    const content = fs.readFileSync(`${buildPath}/${name}`);
-    app.get(`/${name}`, (req, res) => {
-      res.end(content);
-    });
-  });
+// fs.readdirSync(buildPath)
+//   .filter(name => name.indexOf('server') === -1)
+//   .filter(name => name.indexOf('.') > 0)
+//   .forEach(name => {
+//     const content = fs.readFileSync(`${buildPath}/${name}`);
+//     app.get(`/${name}`, (req, res) => {
+//       res.end(content);
+//     });
+//   });
 
 
 app.use(api.router);
 
 
-app.get('*', (req, res) => {
-  const out = renderToString(<App />);
-  const html = String(fs.readFileSync('./build/index.html')).replace('div id="root"></div>', `div id="root">${out}</div>`);
-
-  res.end(html);
+app.get('/', (req, res) => {
+  res.end('OK!');
 });
+// app.get('*', (req, res) => {
+//   const out = renderToString(<App />);
+//   const html = String(fs.readFileSync('./build/index.html')).replace('div id="root"></div>', `div id="root">${out}</div>`);
+//
+//   res.end(html);
+// });
 
 const port = parseInt(process.env.PORT || 3030, 10);
 app.listen(port, () => {
   console.log(`Service started at port ${port}`);
 });
 
+
+module.exports = app;
